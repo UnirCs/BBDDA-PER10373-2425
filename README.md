@@ -5,6 +5,7 @@
 ### PER 10373 Y 11626 - [Código de apoyo y ejercicios](https://github.com/UnirCs/BBDDA-GLOBAL).
 
 
+
 Usaremos este repositorio para nuestro trabajo colaborativo a través del curso.
 El objetivo es que afiancemos los conocimientos que vamos obteniendo en las clases.
 
