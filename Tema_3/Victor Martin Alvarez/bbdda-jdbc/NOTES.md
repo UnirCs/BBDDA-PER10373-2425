@@ -6,45 +6,44 @@ Using the following prompt to generate the CSV file.
 
 ```
 Generate a csv file with headers and 20 rows.
-The first column is 4 characters long, the first character is always a "d" and sequential numbers starting with d008, the next one would be d009, etc; the column header name is "dept_no".
+The first column is 4 characters long, the first character is always a "d" and sequential numbers starting with d010, the next one would be d011, etc; the column header name is "dept_no".
 The second column is 40 characters long with realistic company department names, the column header name is "dept_name".
 ```
 
 Result:
 ```csv
 dept_no,dept_name
-d008,Human Resources Department
-d009,Accounting and Finance Division
-d010,Marketing and Sales Office
-d011,Information Technology Sector
-d012,Executive Board Room
-d013,Legal Services Team
-d014,Customer Support Wing
-d015,Medical Benefits Sector
-d016,Payroll Division
-d017,Operations Unit
-d018,R&D Laboratory
-d019,IT Help Desk Cell
-d020,Public Relations Branch
-d021,Security and Safety Division
-d022,Legal Advisory Council
-d023,Business Development Team
-d024,HR Recruitment Office
-d025,Finance and Audit Department
-d026,Sales and Marketing Division
-d027,IT Development Center
-d028,Legal Operations Office
-d029,Customer Experience Bureau
-d030,Health and Wellness Committee
-d031,Administrative Zone
-d032,Main Framework Team
+d010,Human Resources - Head Office
+d011,Accounting & Finance - New York
+d012,Legal Department - Toronto
+d013,Marketing & Sales - Los Angeles
+d014,IT Support & Development - Vancouver
+d015,Operations & Logistics - Chicago
+d016,Executive Management - San Francisco
+d017,Research & Development - Houston
+d018,Customer Service - Dallas
+d019,Public Relations - Miami
+d020,International Sales - London
+d021,Administrative Services - Berlin
+d022,Strategic Planning - Paris
+d023,Production - Beijing
+d024,Quality Assurance - Tokyo
+d025,Human Resources - Sydney
+d026,Finance & Accounting - Toronto 2
+d027,Legal Assistants - Miami Dade
+d028,Sales & Trading - London City
+d029,IT Operations - Bangalore
+d030,Customer Experience - Taipei
+d031,Marketing Analytics - Buenos Aires
+d032,Local Operations - Moscow
+d033,New Business Development - Johannesburg
 ```
 
 Second prompt
 
 ```
 Generate a CSV file with headers and 100 rows.
-The first column is "emp_no" with sequential integers starting on 20000.
+The first column is "emp_no" with sequential integers starting on 500000.
 The second column is "birth_date" with dates in this format yyyy-MM-dd. The date should be at least 20 years in the past.
 The third column is "first_name" with a maximum of 14 characters. It contains a random first name.
 The forth column is "last_name" with a maximum of 16 characters. It contains a random last name.
@@ -55,104 +54,104 @@ The sixth column is "hire_date" with dates in this format yyyy-MM-dd. The date n
 Result:
 ```csv
 emp_no,birth_date,first_name,last_name,gender,hire_date
-20000,1981-07-16,Mary,Jackson,F,2009-03-11
-20001,1958-03-29,John,Doe,M,2007-09-03
-20002,1987-12-02,Emma,Williams,F,2013-06-24
-20003,1965-06-12,Michael,Brown,M,2006-05-07
-20004,1980-11-04,Sarah,Miller,F,2010-02-16
-20005,1961-02-19,David,Lee,M,2005-12-18
-20006,1996-09-06,Jessica,Wilson,F,2015-08-03
-20007,1964-04-23,Robert,DeLaCruz,M,2008-07-02
-20008,1988-09-15,William,Davis,M,2012-01-29
-20009,1973-03-07,Linda,Gonzalez,F,2011-09-06
-20010,1985-08-24,James,Miller,M,2014-07-21
-20011,1967-12-13,Sarah,Miller,F,2007-01-14
-20012,1999-05-10,Michael,Jackson,M,2016-11-22
-20013,1977-02-03,Emma,Jones,F,2010-06-07
-20014,1984-12-20,Robert,Brown,M,2013-03-31
-20015,1971-07-06,Linda,Williams,F,2009-08-02
-20016,1969-01-14,David,Miller,M,2006-02-19
-20017,1992-11-25,Jessica,Davis,F,2014-12-01
-20018,1975-06-09,William,Miller,M,2012-02-27
-20019,1983-01-05,James,Williams,M,2011-04-12
-20020,1963-03-18,Sarah,Williams,F,2007-08-06
-20021,1986-08-14,Michael,Miller,M,2010-01-04
-20022,1978-04-22,Emma,Brown,F,2009-02-03
-20023,1960-12-04,Robert,Miller,M,2005-11-07
-20024,1994-09-01,David,Lee,M,2015-03-23
-20025,1987-02-11,Jessica,Jackson,F,2013-01-13
-20026,1972-08-17,William,Williams,M,2011-08-09
-20027,1982-11-02,Linda,Miller,F,2012-06-11
-20028,1957-06-03,James,Doe,M,2006-01-16
-20029,1991-03-13,Sarah,Lee,F,2014-07-07
-20030,1976-12-21,Michael,Gonzalez,M,2008-01-27
-20031,1985-05-19,Emma,Williams,F,2012-08-20
-20032,1962-09-02,Robert,Brown,M,2007-06-11
-20033,1974-01-10,David,Miller,M,2009-09-01
-20034,1998-07-08,Jessica,Miller,F,2016-04-18
-20035,1970-03-16,William,Jackson,M,2010-05-02
-20036,1988-06-20,Linda,Williams,F,2014-02-10
-20037,1966-11-08,James,Miller,M,2008-04-21
-20038,1973-09-03,Sarah,Jackson,F,2009-08-17
-20039,1982-02-18,Michael,Williams,M,2011-01-03
-20040,1978-07-29,Emma,Miller,F,2010-03-08
-20041,1965-01-06,Robert,Jackson,M,2006-08-01
-20042,1989-12-31,David,Williams,M,2013-02-17
-20043,1995-05-14,Jessica,Brown,F,2016-02-01
-20044,1979-01-01,William,Miller,M,2012-08-06
-20045,1981-09-19,Linda,Jackson,F,2011-02-07
-20046,1968-05-09,James,Williams,M,2007-02-12
-20047,1993-03-19,Sarah,Miller,F,2014-08-25
-20048,1977-08-13,Michael,Lee,M,2009-01-19
-20049,1986-04-26,Emma,Jackson,F,2012-11-06
-20050,1963-08-07,Robert,Miller,M,2006-06-06
-20051,1983-06-23,David,Williams,M,2010-09-06
-20052,1997-11-12,Jessica,Miller,F,2015-06-01
-20053,1975-02-25,William,Jackson,M,2011-01-24
-20054,1989-08-04,Linda,Williams,F,2013-07-08
-20055,1964-12-16,James,Miller,M,2008-02-10
-20056,1971-05-03,Sarah,Williams,F,2009-06-29
-20057,1980-01-11,Michael,Miller,M,2011-05-09
-20058,1985-03-04,Emma,Jackson,F,2012-04-15
-20059,1959-07-01,Robert,Williams,M,2006-01-09
-20060,1990-01-02,David,Miller,M,2013-05-19
-20061,1972-11-19,Jessica,Williams,F,2010-01-03
-20062,1978-06-04,William,Miller,M,2009-03-09
-20063,1984-05-15,Linda,Jackson,F,2012-02-01
-20064,1967-09-02,James,Williams,M,2007-01-07
-20065,1994-02-12,Sarah,Miller,F,2015-12-07
-20066,1976-07-23,Michael,Jackson,M,2008-09-01
-20067,1983-09-08,Emma,Williams,F,2011-08-01
-20068,1962-02-14,Robert,Miller,M,2006-03-06
-20069,1989-06-20,David,Jackson,M,2012-12-03
-20070,1996-04-16,Jessica,Miller,F,2014-07-01
-20071,1974-08-18,William,Williams,M,2010-06-01
-20072,1987-11-06,Linda,Miller,F,2013-01-07
-20073,1969-03-03,James,Jackson,M,2007-03-11
-20074,1973-06-11,Sarah,Williams,F,2009-02-02
-20075,1981-01-05,Michael,Miller,M,2011-09-01
-20076,1986-02-10,Emma,Jackson,F,2012-07-01
-20077,1960-08-02,Robert,Williams,M,2006-05-13
-20078,1995-01-04,David,Miller,M,2014-02-03
-20079,1977-05-19,Jessica,Jackson,F,2011-04-04
-20080,1979-09-09,William,Williams,M,2009-05-04
-20081,1985-07-03,Linda,Miller,F,2012-11-26
-20082,1966-11-29,James,Williams,M,2007-02-05
-20083,1975-04-06,Sarah,Miller,F,2009-01-05
-20084,1983-09-13,Michael,Jackson,M,2011-06-01
-20085,1987-06-02,Emma,Williams,F,2013-03-04
-20086,1965-01-16,Robert,Miller,M,2006-09-04
-20087,1992-12-29,David,Jackson,M,2014-05-01
-20088,1970-09-01,Jessica,Williams,F,2010-08-09
-20089,1978-02-12,William,Miller,M,2009-11-09
-20090,1982-05-01,Linda,Jackson,F,2012-05-27
-20091,1963-09-09,James,Williams,M,2007-01-01
-20092,1979-03-03,Sarah,Miller,F,2009-08-03
-20093,1988-07-29,Michael,Jackson,M,2012-09-03
-20094,1985-04-10,Emma,Williams,F,2014-01-06
-20095,1961-01-03,Robert,Miller,M,2006-07-03
-20096,1997-06-23,David,Jackson,M,2015-11-02
-20097,1972-12-07,Jessica,Williams,F,2010-05-01
-20098,1976-06-16,William,Miller,M,2009-06-01
-20099,1980-11-09,Linda,Jackson,F,2013-01-01
+500000,1982-09-10,Alice,Johnson,F,2008-03-15
+500001,1968-11-25,Bob,Williams,M,2006-06-20
+500002,1975-03-30,Carol,Smith,F,2010-01-10
+500003,1959-08-05,David,Lee,M,2007-07-25
+500004,1988-06-12,Emma,Williams,F,2013-09-03
+500005,1971-12-28,Frank,Brown,M,2011-11-02
+500006,1985-02-19,Grace,Jones,F,2012-12-18
+500007,1964-10-02,Henry,Miller,M,2007-02-13
+500008,1983-04-23,Ivy,Martinez,F,2014-06-09
+500009,1978-09-08,Jack,Wilson,M,2010-05-17
+500010,1980-01-15,Jane,Taylor,F,2013-03-26
+500011,1962-07-29,Kevin,Davis,M,2009-08-03
+500012,1986-11-03,Lilly,Wilson,F,2014-11-11
+500013,1973-06-17,Michael,Johnson,M,2011-02-08
+500014,1981-03-03,Olivia,Davis,F,2012-04-23
+500015,1976-08-21,Paul,Miller,M,2010-09-13
+500016,1987-12-02,Queen,Taylor,F,2015-05-27
+500017,1967-05-14,Robert,Martinez,M,2008-08-06
+500018,1984-07-01,Sarah,Williams,F,2013-12-16
+500019,1970-10-23,Thomas,Brown,M,2007-11-07
+500020,1989-05-19,Victoria,Miller,F,2014-02-18
+500021,1966-01-10,William,Wilson,M,2006-04-25
+500022,1987-09-02,Xavier,Taylor,M,2015-03-09
+500023,1983-12-17,Yvonne,Martinez,F,2012-07-16
+500024,1960-05-07,Arthur,Williams,M,2006-09-12
+500025,1985-07-23,Barbara,Brown,F,2014-04-29
+500026,1974-02-11,Charles,Miller,M,2011-06-01
+500027,1982-11-06,Doris,Jones,F,2013-06-11
+500028,1969-06-03,Edward,Lee,M,2007-05-06
+500029,1980-02-14,Ellen,Martinez,F,2011-09-05
+500030,1972-08-26,Franklyn,Wilson,M,2009-02-10
+500031,1988-09-29,Graceful,Taylor,F,2015-08-24
+500032,1963-03-13,Henryk,Miller,M,2006-06-19
+500033,1981-05-12,Ivylyn,Martinez,F,2012-11-06
+500034,1977-09-04,Jacklyn,Williams,F,2010-07-13
+500035,1965-12-30,Kevin,Johnson,M,2007-09-03
+500036,1983-07-16,Leta,Brown,F,2013-05-07
+500037,1970-04-28,Michael,Miller,M,2009-01-12
+500038,1986-04-03,Olivia,Taylor,F,2014-08-05
+500039,1961-01-08,Peter,Wilson,M,2006-08-01
+500040,1984-10-06,Queen,Martinez,F,2013-02-12
+500041,1973-03-21,Robert,Williams,M,2011-05-18
+500042,1987-06-14,Sarah,Johnson,F,2015-02-03
+500043,1968-08-09,Thomas,Miller,M,2008-02-11
+500044,1982-02-20,Victoria,Williams,F,2014-11-25
+500045,1975-11-09,William,Johnson,M,2010-03-16
+500046,1988-08-15,Xavier,Martinez,M,2015-06-09
+500047,1967-02-26,Yvonne,Williams,F,2008-04-02
+500048,1985-04-29,Albert,Brown,M,2014-02-03
+500049,1980-08-19,Amelia,Miller,F,2012-06-11
+500050,1978-05-01,Benjamin,Williams,M,2011-01-03
+500051,1986-10-07,Carol,Martinez,F,2015-01-06
+500052,1965-06-17,David,Miller,M,2007-01-09
+500053,1984-01-10,Eva,Williams,F,2013-09-16
+500054,1972-11-02,Frank,Martinez,M,2009-05-04
+500055,1987-07-08,Grace,Miller,F,2015-05-12
+500056,1969-03-25,Henry,Williams,M,2008-07-01
+500057,1982-09-04,Ivy,Martinez,F,2014-07-15
+500058,1976-12-14,Jack,Miller,M,2011-09-01
+500059,1980-06-02,Jane,Williams,F,2013-02-25
+500060,1974-08-06,Kevin,Martinez,M,2010-11-02
+500061,1985-11-12,Lilly,Miller,F,2014-05-19
+500062,1967-05-21,Michael,Williams,M,2007-03-13
+500063,1988-03-03,Olivia,Martinez,F,2015-09-08
+500064,1971-07-17,Paul,Miller,M,2009-09-02
+500065,1983-05-27,Queen,Williams,F,2014-01-07
+500066,1975-09-09,Robert,Martinez,M,2011-03-22
+500067,1986-06-23,Sarah,Miller,F,2015-03-03
+500068,1963-08-13,Thomas,Williams,M,2007-02-05
+500069,1981-12-04,Victoria,Martinez,F,2013-07-14
+500070,1979-04-16,William,Miller,M,2010-06-08
+500071,1987-08-20,Xavier,Williams,M,2015-02-11
+500072,1966-02-24,Yvonne,Martinez,F,2008-01-15
+500073,1985-06-03,Albert,Miller,M,2014-09-02
+500074,1989-11-18,Amelia,Williams,F,2015-07-13
+500075,1973-07-03,Benjamin,Martinez,M,2011-08-09
+500076,1983-02-12,Carol,Miller,F,2014-01-20
+500077,1960-09-01,David,Williams,M,2006-11-03
+500078,1986-08-26,Eva,Martinez,F,2015-01-01
+500079,1977-03-19,Frank,Miller,M,2010-02-01
+500080,1981-07-06,Grace,Williams,F,2013-03-11
+500081,1985-07-03,Linda,Miller,F,2012-11-26
+500082,1966-11-29,James,Williams,M,2007-02-05
+500083,1975-04-06,Sarah,Miller,F,2009-01-05
+500084,1983-09-13,Michael,Jackson,M,2011-06-01
+500085,1987-06-02,Emma,Williams,F,2013-03-04
+500086,1965-01-16,Robert,Miller,M,2006-09-04
+500087,1992-12-29,David,Jackson,M,2014-05-01
+500088,1970-09-01,Jessica,Williams,F,2010-08-09
+500089,1978-02-12,William,Miller,M,2009-11-09
+500090,1982-05-01,Linda,Jackson,F,2012-05-27
+500091,1963-09-09,James,Williams,M,2007-01-01
+500092,1979-03-03,Sarah,Miller,F,2009-08-03
+500093,1988-07-29,Michael,Jackson,M,2012-09-03
+500094,1985-04-10,Emma,Williams,F,2014-01-06
+500095,1961-01-03,Robert,Miller,M,2006-07-03
+500096,1997-06-23,David,Jackson,M,2015-11-02
+500097,1972-12-07,Jessica,Williams,F,2010-05-01
+500098,1976-06-16,William,Miller,M,2009-06-01
+500099,1980-11-09,Linda,Jackson,F,2013-01-01
 ```
