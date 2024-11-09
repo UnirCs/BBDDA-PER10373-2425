@@ -36,393 +36,210 @@ public class MySqlApplication {
                     , System.getProperty("user.dir"));
             log.info("Conexión establecida con la base de datos MySQL");
 
-            // Leemos los datos del fichero CSV
-            List<MySqlDepartment> departments = readDeptData();
-            List<MySqlEmployee> employees = readData();
-            List<MySqlDeptEmp> dept_emp = readDeptEmpData();
-
-            // Introducimos los datos en la base de datos
-            intakeDepartments(connection, departments);
-            intake(connection, employees);
-            intakeDeptEmp(connection, dept_emp);
+            // Leemos los datos del fichero CSV por lotes y realizamos las sentencias UPDATE/INSERT
+            readInsertUpdateDepartments(connection);
+            readInsertUpdateEmployees(connection);
+            readInsertUpdateDeptEmp(connection);
 
         } catch (Exception e) {
             log.error("Error al tratar con la base de datos", e);
         }
     }
 
-    private static List<MySqlDepartment> readDeptData() {
+    private static void readInsertUpdateDepartments(Connection connection) throws SQLException, IOException, CsvValidationException {
 
-        // Try-with-resources. Se cierra el reader automáticamente al salir del bloque try
-        // CSVReader nos permite leer el fichero CSV linea a linea
-        try (CSVReader reader = new CSVReaderBuilder(
-                //new FileReader("new_departments.csv"))
-                new FileReader("new_departments.csv"))
-                .withCSVParser(
-                        new CSVParserBuilder()
-                                .withSeparator(',')
-                                .build())
-                .build()) {
+        // Preparamos sentencias SQL INSERT y UPDATE
+        String insertDepartmentSql = "INSERT INTO departments (dept_no, dept_name) VALUES (?, ?)";
+        String updateDepartmentSql = "UPDATE departments SET dept_name = ? WHERE dept_no = ?";
 
-            // Creamos la lista de empleados y el formato de fecha
-            List<MySqlDepartment> departments = new LinkedList<>();
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        PreparedStatement insertDeptStmt = connection.prepareStatement(insertDepartmentSql);
+        PreparedStatement updateDeptStmt = connection.prepareStatement(updateDepartmentSql);
 
-            // Saltamos la primera linea, que contiene los nombres de las columnas del CSV
+        /* Desactivamos el modo de autocommit en la conexión con la base de datos, dado que
+         * es más eficiente confirmar los cambios una vez por lote en lugar de después de
+         * cada sentencia individual. Así también nos aseguramos de que todoo el grupo de
+         * operaciones se ejecuta de manera atómica (todas o ninguna)
+         */
+        connection.setAutoCommit(false);
+
+        int batchSize = 10;
+        int count = 0;
+        int totalUpdates = 0;
+        int totalInserts = 0;
+
+        try (CSVReader reader = new CSVReaderBuilder(new FileReader("new_departments.csv"))
+                .withCSVParser(new CSVParserBuilder().withSeparator(',').build()).build()) {
             reader.skip(1);
             String[] nextLine;
 
-            // Leemos el fichero linea a linea
-            while((nextLine = reader.readNext()) != null) {
+            while ((nextLine = reader.readNext()) != null) {
+                /* Preparamos la sentencia de actualización. Intentamos primero actualizar
+                 * el registro mediante la sentencia UPDATE. La llamada a updateStmt.executeUpdate()
+                 *  devuelve el número de filas que se ven afectadas por la operación de
+                 * actualización. Si el resultado es 0, significa que no se encontró un
+                 * registro coincidente, y por lo tanto, la fila no existe en la base de datos
+                 */
+                updateDeptStmt.setString(1, nextLine[1]);
+                updateDeptStmt.setString(2, nextLine[0]);
+                // Ejecutamos la sentencia de actualización
+                int rowsAffected = updateDeptStmt.executeUpdate();
+                totalUpdates += rowsAffected;
 
-                // Creamos el departamento y lo añadimos a la lista
-                MySqlDepartment department = new MySqlDepartment(
-                        nextLine[0],
-                        nextLine[1]
-                );
-                departments.add(department);
+                /* Si no se actualizó ninguna fila (rowsAffected == 0), preparamos la
+                 * sentencia de inserción.
+                 * Al probar primero la sentencia UPDATE y luego la de INSERT de manera
+                 * condicional, podemos prescindir de realizar la sentencia SELECT que
+                 * venía en el código de apoyo. Esta forma de comprobación es más eficiente
+                 * porque se reduce el número de consultas enviadas a la base de datos
+                 */
+                if (rowsAffected == 0) {
+                    insertDeptStmt.setString(1, nextLine[0]);
+                    insertDeptStmt.setString(2, nextLine[1]);
+                    insertDeptStmt.addBatch();
+                    totalInserts++;
+                }
+
+                if (++count % batchSize == 0) {
+                    // Ejecutamos el lote (batch) de inserciones
+                    insertDeptStmt.executeBatch();
+                    /* Hacemos commit de la transacción. De esta manera, actualizamos la base de
+                     * datos en cada lote. Así evitamos cargar en memoria todos los nuevos
+                     * registros del archivo CSV. En este caso son pocos, pero si fueran muchos
+                     * podríamos quedarnos sin memoria
+                     */
+                    connection.commit();
+                }
             }
-            return departments;
-        } catch (IOException e) {
-            log.error("Error al leer el fichero CSV", e);
-            throw new RuntimeException(e);
-            //} catch (CsvValidationException | ParseException e) {
-        } catch (CsvValidationException e) {
-            throw new RuntimeException(e);
+            // Ejecutamos cualquier batch restante
+            insertDeptStmt.executeBatch();
+            // Hacemos el commit final de la transacción
+            connection.commit();
+
+            // Log de los resultados totales de sentencias UPDATE e INSERT
+            log.info("Total de sentencias UPDATE ejecutadas en departamentos: " + totalUpdates);
+            log.info("Total de sentencias INSERT ejecutadas en departamentos: " + totalInserts);
         }
     }
 
-    /**
-     * Lee los datos del fichero CSV y los devuelve en una lista de empleados.
-     * El fichero CSV debe estar en la raíz del proyecto.
-     *
-     * @return - Lista de empleados
-     */
-    private static List<MySqlEmployee> readData() {
+    private static void readInsertUpdateEmployees(Connection connection) throws SQLException, IOException, CsvValidationException, ParseException {
 
-        // Try-with-resources. Se cierra el reader automáticamente al salir del bloque try
-        // CSVReader nos permite leer el fichero CSV linea a linea
-        try (CSVReader reader = new CSVReaderBuilder(
-                //new FileReader("unirEmployees.csv"))
-                new FileReader("new_employees.csv"))
-                .withCSVParser(
-                        new CSVParserBuilder()
-                                .withSeparator(',')
-                                .build())
-                .build()) {
+        // Preparamos sentencias SQL INSERT y UPDATE
+        String insertEmployeeSql = "INSERT INTO employees (emp_no, first_name, last_name, gender, hire_date, birth_date) VALUES (?, ?, ?, ?, ?, ?)";
+        String updateEmployeeSql = "UPDATE employees SET first_name = ?, last_name = ?, gender = ?, hire_date = ?, birth_date = ? WHERE emp_no = ?";
 
-            // Creamos la lista de empleados y el formato de fecha
-            List<MySqlEmployee> employees = new LinkedList<>();
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        PreparedStatement insertEmployeeStmt = connection.prepareStatement(insertEmployeeSql);
+        PreparedStatement updateEmployeeStmt = connection.prepareStatement(updateEmployeeSql);
 
-            // Saltamos la primera linea, que contiene los nombres de las columnas del CSV
+        connection.setAutoCommit(false);
+        int batchSize = 10;
+        int count = 0;
+        int totalUpdates = 0;
+        int totalInserts = 0;
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+
+        try (CSVReader reader = new CSVReaderBuilder(new FileReader("new_employees.csv"))
+                .withCSVParser(new CSVParserBuilder().withSeparator(',').build()).build()) {
             reader.skip(1);
             String[] nextLine;
 
-            // Leemos el fichero linea a linea
-            while((nextLine = reader.readNext()) != null) {
+            while ((nextLine = reader.readNext()) != null) {
+                // Preparamos la sentencia de actualización
+                updateEmployeeStmt.setString(1, nextLine[1]);
+                updateEmployeeStmt.setString(2, nextLine[2]);
+                updateEmployeeStmt.setString(3, nextLine[3]);
+                updateEmployeeStmt.setDate(4, new Date(format.parse(nextLine[4]).getTime()));
+                updateEmployeeStmt.setDate(5, new Date(format.parse(nextLine[5]).getTime()));
+                updateEmployeeStmt.setInt(6, Integer.parseInt(nextLine[0]));
+                // Ejecutamos la sentencia de actualización
+                int rowsAffected = updateEmployeeStmt.executeUpdate();
+                totalUpdates += rowsAffected;
 
-                // Creamos el empleado y lo añadimos a la lista
-                MySqlEmployee employee = new MySqlEmployee(
-                        Integer.parseInt(nextLine[0]),
-                        nextLine[1],
-                        nextLine[2],
-                        nextLine[3],
-                        new Date(format.parse(nextLine[4]).getTime()),
-                        new Date(format.parse(nextLine[5]).getTime())
-                );
-                employees.add(employee);
+                // Si no se actualizó ninguna fila, preparamos la sentencia de inserción
+                if (rowsAffected == 0) {
+                    insertEmployeeStmt.setInt(1, Integer.parseInt(nextLine[0]));
+                    insertEmployeeStmt.setString(2, nextLine[1]);
+                    insertEmployeeStmt.setString(3, nextLine[2]);
+                    insertEmployeeStmt.setString(4, nextLine[3]);
+                    insertEmployeeStmt.setDate(5, new Date(format.parse(nextLine[4]).getTime()));
+                    insertEmployeeStmt.setDate(6, new Date(format.parse(nextLine[5]).getTime()));
+                    insertEmployeeStmt.addBatch();
+                    totalInserts++;
+                }
+
+                if (++count % batchSize == 0) {
+                    // Ejecutamos el lote de inserciones
+                    insertEmployeeStmt.executeBatch();
+                    // Hacemos el commit de la transacción
+                    connection.commit();
+                }
             }
-            return employees;
-        } catch (IOException e) {
-            log.error("Error al leer el fichero CSV", e);
-            throw new RuntimeException(e);
-        } catch (CsvValidationException | ParseException e) {
-            throw new RuntimeException(e);
+            // Ejecutamos cualquier lote restante
+            insertEmployeeStmt.executeBatch();
+            // Hacemos commit final de la transacción
+            connection.commit();
+
+            // Log de los resultados totales de sentencias UPDATE e INSERT
+            log.info("Total de sentencias UPDATE ejecutadas en empleados: " + totalUpdates);
+            log.info("Total de sentencias INSERT ejecutadas en empleados: " + totalInserts);
         }
     }
 
-    private static List<MySqlDeptEmp> readDeptEmpData() {
+    private static void readInsertUpdateDeptEmp(Connection connection) throws SQLException, IOException, CsvValidationException, ParseException {
 
-        // Try-with-resources. Se cierra el reader automáticamente al salir del bloque try
-        // CSVReader nos permite leer el fichero CSV linea a linea
-        try (CSVReader reader = new CSVReaderBuilder(
-                //new FileReader("new_employee_department.csv"))
-                new FileReader("new_employee_departments.csv"))
-                .withCSVParser(
-                        new CSVParserBuilder()
-                                .withSeparator(',')
-                                .build())
-                .build()) {
+        // Preparamos sentencias SQL INSERT y UPDATE
+        String insertDeptEmpSql = "INSERT INTO dept_emp (emp_no, dept_no, from_date, to_date) VALUES (?, ?, ?, ?)";
+        String updateDeptEmpSql = "UPDATE dept_emp SET dept_no = ?, from_date = ?, to_date = ? WHERE emp_no = ?";
 
-            // Creamos la lista de empleados y el formato de fecha
-            List<MySqlDeptEmp> dept_emps = new LinkedList<>();
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        PreparedStatement insertDeptEmpStmt = connection.prepareStatement(insertDeptEmpSql);
+        PreparedStatement updateDeptEmpStmt = connection.prepareStatement(updateDeptEmpSql);
 
-            // Saltamos la primera linea, que contiene los nombres de las columnas del CSV
+        connection.setAutoCommit(false);
+        int batchSize = 10;
+        int count = 0;
+        int totalUpdates = 0;
+        int totalInserts = 0;
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+
+        try (CSVReader reader = new CSVReaderBuilder(new FileReader("new_employee_departments.csv"))
+                .withCSVParser(new CSVParserBuilder().withSeparator(',').build()).build()) {
             reader.skip(1);
             String[] nextLine;
 
-            // Leemos el fichero linea a linea
-            while((nextLine = reader.readNext()) != null) {
+            while ((nextLine = reader.readNext()) != null) {
+                // Preparamos la sentencia de actualización
+                updateDeptEmpStmt.setString(1, nextLine[1]);
+                updateDeptEmpStmt.setDate(2, new Date(format.parse(nextLine[2]).getTime()));
+                updateDeptEmpStmt.setDate(3, new Date(format.parse(nextLine[3]).getTime()));
+                updateDeptEmpStmt.setInt(4, Integer.parseInt(nextLine[0]));
+                // Ejecutamos la sentencia de actualización
+                int rowsAffected = updateDeptEmpStmt.executeUpdate();
+                totalUpdates += rowsAffected;
 
-                // Creamos el departamento y lo añadimos a la lista
-                MySqlDeptEmp dept_emp = new MySqlDeptEmp(
-                        Integer.parseInt(nextLine[0]),
-                        nextLine[1],
-                        new Date(format.parse(nextLine[2]).getTime()),
-                        new Date(format.parse(nextLine[3]).getTime())
-                );
-                dept_emps.add(dept_emp);
+                // Si no se actualizó ninguna fila, preparamos la sentencia de inserción
+                if (rowsAffected == 0) {
+                    insertDeptEmpStmt.setInt(1, Integer.parseInt(nextLine[0]));
+                    insertDeptEmpStmt.setString(2, nextLine[1]);
+                    insertDeptEmpStmt.setDate(3, new Date(format.parse(nextLine[2]).getTime()));
+                    insertDeptEmpStmt.setDate(4, new Date(format.parse(nextLine[3]).getTime()));
+                    insertDeptEmpStmt.addBatch();
+                    totalInserts++;
+                }
+
+                if (++count % batchSize == 0) {
+                    // Ejecutamos el lote de inserciones
+                    insertDeptEmpStmt.executeBatch();
+                    // Hacemos el commit de la transacción
+                    connection.commit();
+                }
             }
-            return dept_emps;
-        } catch (IOException e) {
-            log.error("Error al leer el fichero CSV", e);
-            throw new RuntimeException(e);
-        } catch (CsvValidationException | ParseException e) {
-            throw new RuntimeException(e);
+            // Ejecutamos cualquier lote restante
+            insertDeptEmpStmt.executeBatch();
+            // Hacemos el commit final de la transacción
+            connection.commit();
+
+            // Log de los resultados totales de sentencias UPDATE e INSERT
+            log.info("Total de sentencias UPDATE ejecutadas en dept_emp: " + totalUpdates);
+            log.info("Total de sentencias INSERT ejecutadas en dept_emp: " + totalInserts);
         }
-    }
-
-    private static void intakeDepartments(Connection connection, List<MySqlDepartment> departments) throws SQLException {
-
-        String selectSql = "SELECT COUNT(*) FROM departments WHERE dept_name = ? AND dept_no = ?";
-        String insertSql = "INSERT INTO departments (dept_name, dept_no) "
-                + "VALUES (?, ?)";
-        String updateSql = "UPDATE departments SET dept_name = ? WHERE dept_no = ?";
-        int lote = 5;
-        int contador = 0;
-
-        // Preparamos las consultas, una unica vez para poder reutilizarlas en el batch
-        PreparedStatement insertStatement = connection.prepareStatement(insertSql);
-        PreparedStatement updateStatement = connection.prepareStatement(updateSql);
-
-        // Desactivamos el autocommit para poder ejecutar el batch y hacer commit al final
-        connection.setAutoCommit(false);
-
-        for (MySqlDepartment department : departments) {
-
-            // Comprobamos si el empleado existe
-            PreparedStatement selectStatement = connection.prepareStatement(selectSql);
-            selectStatement.setString(1, department.getDeptName());
-            selectStatement.setString(2, department.getDeptId());
-            ResultSet resultSet = selectStatement.executeQuery();
-            resultSet.next(); // Nos movemos a la primera fila
-            int rowCount = resultSet.getInt(1);
-
-            // Si existe, actualizamos. Si no, insertamos
-            if(rowCount > 0) {
-                fillUpdateDepartmentStatement(updateStatement, department);
-                updateStatement.addBatch();
-            } else {
-                fillInsertDepartmentStatement(insertStatement, department);
-                insertStatement.addBatch();
-            }
-
-            // Ejecutamos el batch cada lote de registros
-            if (++contador % lote == 0) {
-                updateStatement.executeBatch();
-                insertStatement.executeBatch();
-            }
-        }
-
-        // Ejecutamos el batch final
-        insertStatement.executeBatch();
-        updateStatement.executeBatch();
-
-        // Hacemos commit y volvemos a activar el autocommit
-        connection.commit();
-        connection.setAutoCommit(true);
-    }
-
-    /**
-     * Introduce los datos en la base de datos.
-     * Si el empleado ya existe, se actualiza.
-     * Si no existe, se inserta.
-     *
-     * Toma como referencia el campo emp_no para determinar si el empleado existe o no.
-     * @param connection - Conexión a la base de datos
-     * @param employees - Lista de empleados
-     * @throws SQLException - Error al ejecutar la consulta
-     */
-    private static void intake(Connection connection, List<MySqlEmployee> employees) throws SQLException {
-
-        String selectSql = "SELECT COUNT(*) FROM employees WHERE emp_no = ?";
-        String insertSql = "INSERT INTO employees (emp_no, first_name, last_name, gender, hire_date, birth_date) "
-                + "VALUES (?, ?, ?, ?, ?, ?)";
-        String updateSql = "UPDATE employees SET first_name = ?, last_name = ?, gender = ?, hire_date = ?, birth_date = ? WHERE emp_no = ?";
-        int lote = 5;
-        int contador = 0;
-
-        // Preparamos las consultas, una unica vez para poder reutilizarlas en el batch
-        PreparedStatement insertStatement = connection.prepareStatement(insertSql);
-        PreparedStatement updateStatement = connection.prepareStatement(updateSql);
-
-        // Desactivamos el autocommit para poder ejecutar el batch y hacer commit al final
-        connection.setAutoCommit(false);
-
-        for (MySqlEmployee employee : employees) {
-
-            // Comprobamos si el empleado existe
-            PreparedStatement selectStatement = connection.prepareStatement(selectSql);
-            selectStatement.setInt(1, employee.getEmployeeId()); // Código del empleado
-            ResultSet resultSet = selectStatement.executeQuery();
-            resultSet.next(); // Nos movemos a la primera fila
-            int rowCount = resultSet.getInt(1);
-
-            // Si existe, actualizamos. Si no, insertamos
-            if(rowCount > 0) {
-                fillUpdateStatement(updateStatement, employee);
-                updateStatement.addBatch();
-            } else {
-                fillInsertStatement(insertStatement, employee);
-                insertStatement.addBatch();
-            }
-
-            // Ejecutamos el batch cada lote de registros
-            if (++contador % lote == 0) {
-                updateStatement.executeBatch();
-                insertStatement.executeBatch();
-            }
-        }
-
-        // Ejecutamos el batch final
-        insertStatement.executeBatch();
-        updateStatement.executeBatch();
-
-        // Hacemos commit y volvemos a activar el autocommit
-        connection.commit();
-        connection.setAutoCommit(true);
-    }
-
-    private static void intakeDeptEmp(Connection connection, List<MySqlDeptEmp> deptEmps) throws SQLException {
-
-        String selectSql = "SELECT COUNT(*) FROM dept_emp WHERE dept_no = ?";
-        String insertSql = "INSERT INTO dept_emp (emp_no, dept_no, from_date, to_date)" +
-                "VALUES (?, ?, ?, ?)";
-        String updateSql = "UPDATE dept_emp SET dept_no = ?, from_date = ?, to_date = ? WHERE emp_no = ?";
-        int lote = 5;
-        int contador = 0;
-
-        // Preparamos las consultas, una unica vez para poder reutilizarlas en el batch
-        PreparedStatement insertStatement = connection.prepareStatement(insertSql);
-        PreparedStatement updateStatement = connection.prepareStatement(updateSql);
-
-        // Desactivamos el autocommit para poder ejecutar el batch y hacer commit al final
-        connection.setAutoCommit(false);
-
-        for (MySqlDeptEmp deptEmp : deptEmps) {
-
-            // Comprobamos si el empleado existe
-            PreparedStatement selectStatement = connection.prepareStatement(selectSql);
-            selectStatement.setString(1, deptEmp.getDeptId()); // Código del empleado
-            ResultSet resultSet = selectStatement.executeQuery();
-            resultSet.next(); // Nos movemos a la primera fila
-            int rowCount = resultSet.getInt(1);
-
-            // Si existe, actualizamos. Si no, insertamos
-            if(rowCount > 0) {
-                fillUpdateDeptEmpStatement(updateStatement, deptEmp);
-                updateStatement.addBatch();
-            } else {
-                fillInsertDeptEmpStatement(insertStatement, deptEmp);
-                insertStatement.addBatch();
-            }
-
-            // Ejecutamos el batch cada lote de registros
-            if (++contador % lote == 0) {
-                updateStatement.executeBatch();
-                insertStatement.executeBatch();
-            }
-        }
-
-        // Ejecutamos el batch final
-        insertStatement.executeBatch();
-        updateStatement.executeBatch();
-
-        // Hacemos commit y volvemos a activar el autocommit
-        connection.commit();
-        connection.setAutoCommit(true);
-    }
-
-    private static void fillInsertDepartmentStatement(PreparedStatement statement, MySqlDepartment department) throws SQLException {
-        // Ojo, en estos métodos es necesario establecer los parámetros en el mismo orden en el que aparecen
-        // en su respectiva consulta SQL del metodo de turno intake (en este caso, consulta insertSql del
-        // metodo intakeDepartments
-        statement.setString(1, department.getDeptName());
-        statement.setString(2, department.getDeptId());
-    }
-
-    /**
-     * Rellena los parámetros de un PreparedStatement para una consulta INSERT.
-     *
-     * @param statement - PreparedStatement
-     * @param employee - Empleado
-     * @throws SQLException - Error al rellenar los parámetros
-     */
-    private static void fillInsertStatement(PreparedStatement statement, MySqlEmployee employee) throws SQLException {
-        statement.setInt(1, employee.getEmployeeId());
-        statement.setString(2, employee.getFirstName());
-        statement.setString(3, employee.getLastName());
-        statement.setString(4, employee.getGender());
-        statement.setDate(5, employee.getHireDate());
-        statement.setDate(6, employee.getBirthDate());
-
-    }
-
-    private static void fillInsertDeptEmpStatement(PreparedStatement statement, MySqlDeptEmp deptEmp) throws SQLException {
-        statement.setInt(1, deptEmp.getEmpId());
-        statement.setString(2, deptEmp.getDeptId());
-        statement.setDate(3, deptEmp.getFromDate());
-        statement.setDate(4, deptEmp.getToDate());
-    }
-
-    private static void fillUpdateDepartmentStatement(PreparedStatement statement, MySqlDepartment department) throws SQLException {
-        statement.setString(1, department.getDeptName());
-        statement.setString(2, department.getDeptId());
-    }
-
-    /**
-     * Rellena los parámetros de un PreparedStatement para una consulta UPDATE.
-     *
-     * @param statement - PreparedStatement
-     * @param employee - Empleado
-     * @throws SQLException - Error al rellenar los parámetros
-     */
-    private static void fillUpdateStatement(PreparedStatement statement, MySqlEmployee employee) throws SQLException {
-        statement.setString(1, employee.getFirstName());
-        statement.setString(2, employee.getLastName());
-        statement.setString(3, employee.getGender());
-        statement.setDate(4, employee.getHireDate());
-        statement.setDate(5, employee.getBirthDate());
-        statement.setInt(6, employee.getEmployeeId());
-    }
-
-    private static void fillUpdateDeptEmpStatement(PreparedStatement statement, MySqlDeptEmp deptEmp) throws SQLException {
-        statement.setString(1, deptEmp.getDeptId());
-        statement.setDate(2, deptEmp.getFromDate());
-        statement.setDate(3, deptEmp.getToDate());
-        statement.setInt(4, deptEmp.getEmpId());
-    }
-
-
-    /**
-     * Devuelve el último id de una columna de una tabla.
-     * Util para obtener el siguiente id a insertar.
-     *
-     * @param connection - Conexión a la base de datos
-     * @param table - Nombre de la tabla
-     * @param fieldName - Nombre de la columna
-     * @return - Último id de la columna
-     * @throws SQLException - Error al ejecutar la consulta
-     */
-    private static int lastId(Connection connection, String table, String fieldName) throws SQLException {
-        String selectSql = "SELECT MAX(?) FROM ?";
-        PreparedStatement selectStatement = connection.prepareStatement(selectSql);
-        selectStatement.setString(1, fieldName);
-        selectStatement.setString(2, table);
-        ResultSet resultSet = selectStatement.executeQuery();
-        resultSet.next(); // Nos movemos a la primera fila
-        return resultSet.getInt(1);
     }
 }
