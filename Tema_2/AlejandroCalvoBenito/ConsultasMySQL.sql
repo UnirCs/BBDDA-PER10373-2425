@@ -1,8 +1,9 @@
 # 1.Obtener el número de hombres y mujeres de la base de datos. Ordenar de forma descendente.
 
-SELECT e.gender, COUNT(*)
-FROM employees.employees e
-GROUP BY e.gender;
+SELECT gender, COUNT(*) as Total
+FROM employees.employees
+GROUP BY gender
+ORDER BY Total DESC ;
 
 # 2.Mostrar el nombre, apellido y salario de la persona mejor pagada de un departamento concreto (parámetro variable).
 
