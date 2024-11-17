@@ -4,34 +4,30 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.io.Serializable;
-import java.util.Date;
 import java.util.Objects;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-
-public class SalaryId implements Serializable {
+// Necesitamos implementar Serializable para que Hibernate pueda serializar y deserializar la clase
+public class DeptEmployeeId implements Serializable {
 
     private Integer empNo;
-    private Date fromDate;
+    private String deptNo;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SalaryId that = (SalaryId) o;
+        DeptEmployeeId that = (DeptEmployeeId) o;
         return Objects.equals(empNo, that.empNo) &&
-                Objects.equals(fromDate, that.fromDate);
+                Objects.equals(deptNo, that.deptNo);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(empNo, fromDate);
+        return Objects.hash(empNo, deptNo);
     }
-
-
 }
