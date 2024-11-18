@@ -25,6 +25,7 @@ import java.util.List;
 public class MySqlApplication {
 
     private static final String DATABASE = "employees";
+    public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyy-MM-dd");
 
     public static void main(String[] args) {
 
@@ -36,14 +37,20 @@ public class MySqlApplication {
                     , System.getProperty("user.dir"));
             log.info("Conexión establecida con la base de datos MySQL");
 
+            //insertar un empleado
+            simpleInsert(connection, new MySqlEmployee(999999, "Juan", "Perez", "M",
+                    new Date(SIMPLE_DATE_FORMAT.parse("2024-11-18").getTime()),
+                    new Date(SIMPLE_DATE_FORMAT.parse("1994-05-17").getTime())
+                    ));
+
             // Leemos los datos del fichero CSV
-            List<MySqlEmployee> employees = readData();
+//            List<MySqlEmployee> employees = readData();
             List<MySqlEmployee> employees2 = readEmployeesData();
             List<MySqlDepartment> departments = readDepartmentData();
             List<MySqlDepEmp> deptEmps = readDeptEmpData();
 
             // Introducimos los datos en la base de datos
-            intakeEmployees(connection, employees);
+//            intakeEmployees(connection, employees);
             intakeEmployees(connection, employees2);
             intakeDepartments(connection, departments);
             intakeDepartmentsEmployees(connection, deptEmps);
@@ -141,6 +148,45 @@ public class MySqlApplication {
         } catch (CsvValidationException | ParseException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static void simpleInsert(Connection connection, MySqlEmployee employee) throws SQLException {
+
+        String selectSql = "SELECT COUNT(*) FROM employees WHERE emp_no = ?";
+        String insertSql = "INSERT INTO employees (emp_no, first_name, last_name, gender, hire_date, birth_date) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
+        String updateSql = "UPDATE employees SET first_name = ?, last_name = ?, gender = ?, hire_date = ?, birth_date = ? WHERE emp_no = ?";
+
+        // Preparamos las consultas, una unica vez para poder reutilizarlas en el batch
+        PreparedStatement insertStatement = connection.prepareStatement(insertSql);
+        PreparedStatement updateStatement = connection.prepareStatement(updateSql);
+
+        // Desactivamos el autocommit para poder ejecutar el batch y hacer commit al final
+        connection.setAutoCommit(false);
+
+        // Comprobamos si el empleado existe
+        PreparedStatement selectStatement = connection.prepareStatement(selectSql);
+        selectStatement.setInt(1, employee.getEmployeeId()); // Código del empleado
+        ResultSet resultSet = selectStatement.executeQuery();
+        resultSet.next(); // Nos movemos a la primera fila
+        int rowCount = resultSet.getInt(1);
+
+        // Si existe, actualizamos. Si no, insertamos
+        if (rowCount > 0) {
+            fillUpdateStatement(updateStatement, employee);
+            updateStatement.addBatch();
+        } else {
+            fillInsertStatement(insertStatement, employee);
+            insertStatement.addBatch();
+        }
+
+        // Ejecutamos el batch cada lote de registros
+        updateStatement.executeBatch();
+        insertStatement.executeBatch();
+
+        // Hacemos commit y volvemos a activar el autocommit
+        connection.commit();
+        connection.setAutoCommit(true);
     }
 
     private static List<MySqlDepartment> readDepartmentData() {
