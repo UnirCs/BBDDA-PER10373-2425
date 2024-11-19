@@ -33,4 +33,4 @@ Este proyecto se centra en el aprendizaje de Java Database Connectivity (JDBC) p
 - [Instalar maven de forma automática (Mac)](https://formulae.brew.sh/formula/maven)
 
 Revisa las clases del aula virtual y los recursos adicionales para obtener información sobre cómo configurar y utilizar el proyecto.
-.
+
