@@ -1,0 +1,8 @@
+com/unir/app/write/MySqlApplication.class
+com/unir/model/MySqlEmployee.class
+com/unir/model/OracleCountry.class
+com/unir/app/read/MySqlApplication.class
+com/unir/app/write/OracleApplication.class
+com/unir/app/read/OracleApplication.class
+com/unir/config/OracleDatabaseConnector.class
+com/unir/config/MySqlConnector.class
