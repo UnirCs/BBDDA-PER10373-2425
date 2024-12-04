@@ -1,0 +1,259 @@
+{
+	"info": {
+		"_postman_id": "c4d81190-0cba-4d7d-b8e4-c4e7cd964f92",
+		"name": "MySQL Employee API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16752958"
+	},
+	"item": [
+		{
+			"name": "Get employees",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8088/api/employees",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"employees"
+					],
+					"query": [
+						{
+							"key": "hireDate",
+							"value": "2023-02-15",
+							"disabled": true
+						},
+						{
+							"key": "hiredAfter",
+							"value": "2023-01-15",
+							"disabled": true
+						},
+						{
+							"key": "hiredBefore",
+							"value": "2023-06-15",
+							"disabled": true
+						},
+						{
+							"key": "firstName",
+							"value": "Mario",
+							"disabled": true
+						},
+						{
+							"key": "lastName",
+							"value": "Rodi",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Count employees hired",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8088/api/employees/count?fromDate=2023-02-01&toDate=2023-02-28",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"employees",
+						"count"
+					],
+					"query": [
+						{
+							"key": "fromDate",
+							"value": "2023-02-01"
+						},
+						{
+							"key": "toDate",
+							"value": "2023-02-28"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getHighestPaid",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8088/api/employees/highestPaid?departmentName=Customer%20Service",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"employees",
+						"highestPaid"
+					],
+					"query": [
+						{
+							"key": "departmentName",
+							"value": "Customer%20Service"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get senior employee",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8088/api/employees/senior?gender=F",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"employees",
+						"senior"
+					],
+					"query": [
+						{
+							"key": "gender",
+							"value": "F"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get department by name",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8088/api/departments/name/Customer%20Service",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"departments",
+						"name",
+						"Customer%20Service"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get department",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8088/api/departments/name/Customer%20Service",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"departments",
+						"name",
+						"Customer%20Service"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search department",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8088/api/departments/name/Customer%20Service",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"departments",
+						"name",
+						"Customer%20Service"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get department Cached",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8088/api-cached/departments/finance",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api-cached",
+						"departments",
+						"finance"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Department",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"deptNo\":\"d011\",\n    \"deptName\":\"Testtttttttttttt\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8088/api/departments/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"departments",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
