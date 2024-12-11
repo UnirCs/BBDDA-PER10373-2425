@@ -1,0 +1,23 @@
+## Configuracion de Spring
+spring:
+  application:
+    name: bbdda-spring-data
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/employees} #Actualizar con el valor de tu despliegue local de MySQL.
+    driver-class-name: ${DB_DRIVER:com.mysql.cj.jdbc.Driver}
+    username: ${DB_USER:root} #Actualizar con el valor de tu usuario.
+    password: ${DB_PASSWORD:mysql} #Actualizar con el valor de tu contraseña de root.
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+  cache:
+    type: redis
+    host: localhost
+    port: 6379
+    redis:
+      time-to-live: 60000
+
+## Configuracion de Instancia 
+server:
+  port: 8088
