@@ -1,0 +1,129 @@
+{
+	"info": {
+		"_postman_id": "88bab1c6-d6e6-4033-8244-9e908c609a74",
+		"name": "MySQL Employee API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "3472643"
+	},
+	"item": [
+		{
+			"name": "Get employees",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8088/api/employees",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"employees"
+					],
+					"query": [
+						{
+							"key": "hireDate",
+							"value": "2023-02-15",
+							"disabled": true
+						},
+						{
+							"key": "hiredAfter",
+							"value": "2023-01-15",
+							"disabled": true
+						},
+						{
+							"key": "hiredBefore",
+							"value": "2023-06-15",
+							"disabled": true
+						},
+						{
+							"key": "firstName",
+							"value": "Mario",
+							"disabled": true
+						},
+						{
+							"key": "lastName",
+							"value": "Rodi",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get department",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8088/api/departments/Customer%20Service",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"departments",
+						"Customer%20Service"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get department Cached",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8088/api-cached/departments/finance",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api-cached",
+						"departments",
+						"finance"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Department",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"deptNo\":\"d011\",\n    \"deptName\":\"Testtttttttttttt\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8088/api/departments/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"departments",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
