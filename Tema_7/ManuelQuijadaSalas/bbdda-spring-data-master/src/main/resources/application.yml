@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: bbdda-spring-data
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3307/employees}  # Cambia el puerto si es necesario
+    driver-class-name: ${DB_DRIVER:com.mysql.cj.jdbc.Driver}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:mysql}
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+  cache:
+    type: redis
+    host: localhost
+    port: 6379
+    redis:
+      time-to-live: 60000
+  swagger:
+    api-docs:
+      enabled: true
+    ui:
+      enabled: true
+      path: /swagger-ui.html
+      url: /v3/api-docs
+
+
+server:
+  port: 8088
