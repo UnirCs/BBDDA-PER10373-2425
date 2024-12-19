@@ -4,6 +4,9 @@ select gender, count(*) as total from employees.employees
 group by gender
 order by total desc;
 
+select gender, count(*) as total from employees.employees group by gender order by total desc;
+
+
 #Total de Hombres: 179973
 #Total de Mujeres: 120051
 
@@ -16,7 +19,12 @@ from employees.dept_emp de
 join employees.departments d on de.dept_no = d.dept_no #Aquí se muestra a través de que atributo se relacionan las tablas
 join employees.employees e on e.emp_no = de.emp_no
 join employees.salaries s on s.emp_no = e.emp_no
-where s.salary in (select max(salary) from employees.salaries join employees.departments d where d.dept_name = 'Sales');
+where d.dept_no = "d008"
+order by s.salary desc
+limit 1;
+
+select * from employees.departments
+order by dept_no desc;
 
 # Emp_no: 43624,Dept_name: Sales, First_name: Tokuyasu, Last_Name: Pesch
 
@@ -28,18 +36,19 @@ order by salary desc;
 #Haciendo está consulta el segundo empleado mejor pagado es: 254466
 #Repetimos la query anterior:
 
-select e.emp_no, d.dept_name, e.first_name, e.last_name
+select e.emp_no, d.dept_name, e.first_name, e.last_name, s.salary
 from employees.dept_emp de
 join employees.departments d on de.dept_no = d.dept_no
 join employees.employees e on e.emp_no = de.emp_no
 join employees.salaries s on s.emp_no = e.emp_no
-where s.salary = 156286;
+where d.dept_no = "d008"
+limit 1 offset 1;
 
 # Emp_no: 254466,Dept_name: Sales, First_name: Honesty, Last_Name: Mukaidono
 
 # 4. Mostrar el número de empleados contratados en un mes concreto (parámetro variable).
 
-select count(*) from employees.employees
+select count(*) as cantidad from employees.employees
 where hire_date between '19890101' and '19890131';
 
 #Total de empleados en el mes de Enero del año 1989 es: 2530
