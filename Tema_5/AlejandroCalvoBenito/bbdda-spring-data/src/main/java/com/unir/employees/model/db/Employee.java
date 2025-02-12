@@ -48,4 +48,3 @@ public class Employee {
 	@OneToMany(mappedBy = "employee")
 	private Set<DeptManager> deptManagers;
 }
-
